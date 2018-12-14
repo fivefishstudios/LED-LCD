@@ -21,6 +21,11 @@ DigitalOut led(PG_13);
 // Our Interrupt Handler Routine, for Button(PA_0)
 void PBIntHandler(){
   led = !led;  // toggle LED
+  if (led){
+    lcd.DisplayStringAt(0, 100, (uint8_t *) "  Interrupt!  ", CENTER_MODE);  // will this work?
+  } else {
+    lcd.DisplayStringAt(0, 100, (uint8_t *) " Another IRQ! ", CENTER_MODE);  // will this work?
+  }
 }
 
 #define DISPLAY_DELAY 0.001f 
@@ -135,14 +140,15 @@ int main() {
   Button.rise(&PBIntHandler);
 
   // setup LCD Display
-  lcd.Clear(LCD_COLOR_RED);
+  lcd.Clear(0xFF0000CC);
   lcd.SetFont(&Font24);
-  lcd.SetBackColor(LCD_COLOR_RED); // text background color
+  lcd.SetBackColor(0xFF0000CC); // text background color
   lcd.SetTextColor(LCD_COLOR_WHITE); // text foreground color
   char buf[50];   // buffer for integer to text conversion 
 
   // setup 7-segment LED Display
   Display_Clear(); 	
+  lcd.DisplayStringAt(0, 200, (uint8_t *) " by owel.codes ", CENTER_MODE);  // will this work?
  
   // start of main loop 
   while(true){

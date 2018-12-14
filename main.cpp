@@ -2,7 +2,6 @@
   Demo program combining Multiplexed 7-segment LED Display and LCD Display.
   Push-button Switch input via Interrupt subroutines.
 */
-
 #include "mbed.h"
 #include "LCD_DISCO_F429ZI.h"
 using namespace std;
@@ -10,9 +9,21 @@ using namespace std;
 // serial comms for debugging
 Serial pc(USBTX, USBRX);  
 
+// LCD library
 LCD_DISCO_F429ZI lcd;
 
-#define DISPLAY_DELAY 0.0001f   // 100 us 
+// Interrupt for User PushButton switch 
+InterruptIn Button(PA_0);
+
+// User LED
+DigitalOut led(PG_13);
+
+// Our Interrupt Handler Routine, for Button(PA_0)
+void PBIntHandler(){
+  led = !led;  // toggle LED
+}
+
+#define DISPLAY_DELAY 0.001f 
 
 static const int Digits[] = {
   //abcdefgp    // 7-segment display + decimal point
@@ -113,25 +124,33 @@ void Display_Number(int Number, uint32_t Duration_ms)
   t.stop(); // stop timer
 }
 
+/* 
+  Start of Main Program 
+  */ 
 int main() {
   // set usb serial
   pc.baud(115200);
 
+  // setup Interrupt Handler
+  Button.rise(&PBIntHandler);
+
+  // setup LCD Display
   lcd.Clear(LCD_COLOR_RED);
-
-  Display_Clear();
- 	lcd.SetFont(&Font24);
-
-  char buf[50];
+  lcd.SetFont(&Font24);
   lcd.SetBackColor(LCD_COLOR_RED); // text background color
   lcd.SetTextColor(LCD_COLOR_WHITE); // text foreground color
+  char buf[50];   // buffer for integer to text conversion 
 
+  // setup 7-segment LED Display
+  Display_Clear(); 	
+ 
+  // start of main loop 
   while(true){
     for (int i=0; i<1000; i++){
-      sprintf(buf, "Counting %03d ", i);
+      sprintf(buf, "Counting %03d ", i);  // format/convert integer to 
       lcd.DisplayStringAt(10, 50, (uint8_t *) buf, CENTER_MODE);
 
-      Display_Number(i, 100); // Number to display, Duration_ms
+      Display_Number(i, 50); // Number to display, Duration_ms
     }
   }
 

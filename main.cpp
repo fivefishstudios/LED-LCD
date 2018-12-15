@@ -16,7 +16,10 @@ LCD_DISCO_F429ZI lcd;
 InterruptIn Button(PA_0);
 
 // User LED
-DigitalOut led(PG_13);
+DigitalOut  led(PG_13);
+PwmOut      RGBLED_red(PE_9);
+PwmOut      RGBLED_grn(PE_11);
+PwmOut      RGBLED_blu(PA_5);
 
 // Our Interrupt Handler Routine, for Button(PA_0)
 void PBIntHandler(){
@@ -26,6 +29,14 @@ void PBIntHandler(){
   } else {
     lcd.DisplayStringAt(0, 100, (uint8_t *) " Another IRQ! ", CENTER_MODE);  // will this work?
   }
+}
+
+/* intensity in % percentage */
+void SetLEDBrightness(PwmOut led, float intensity) {
+	float period = 1/60.0f;
+	led.period(period);
+	led.pulsewidth(period * (intensity / 100));
+	wait(0.002);
 }
 
 #define DISPLAY_DELAY 0.001f 
@@ -149,13 +160,17 @@ int main() {
   // setup 7-segment LED Display
   Display_Clear(); 	
   lcd.DisplayStringAt(0, 200, (uint8_t *) " by owel.codes ", CENTER_MODE);  // will this work?
- 
+
+  // let's just light up RGB Led for now
+  SetLEDBrightness(RGBLED_red, 100);
+  SetLEDBrightness(RGBLED_grn, 100);
+  SetLEDBrightness(RGBLED_blu, 100);
+
   // start of main loop 
   while(true){
     for (int i=0; i<1000; i++){
       sprintf(buf, "Counting %03d ", i);  // format/convert integer to 
       lcd.DisplayStringAt(10, 50, (uint8_t *) buf, CENTER_MODE);
-
       Display_Number(i, 50); // Number to display, Duration_ms
     }
   }
